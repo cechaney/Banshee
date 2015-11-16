@@ -1,0 +1,13 @@
+{
+	"name": "bansheejs",
+	"version": "0.0.1",
+	"homepage": "",
+	"description": "A node.js service that returns html rendered",
+	"author": "Chris Chaney",
+	"dependencies": {
+		"respawn": "latest",
+		"log4js": "latest",
+		"qs": "latest",
+		"url": "latest"
+	}
+}
