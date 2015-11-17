@@ -4,10 +4,9 @@
 	"port": 8888,
 	"workerCount": 3,
 	"workerConfig": {
-        "port": 9000,
+        "startingPort": 9000,
         "timeout": 10000,
         "parse_delay": 5000,
-        "user_agent": "Banshee/#{version}",
         "max_connections": 10
 	}
 }
