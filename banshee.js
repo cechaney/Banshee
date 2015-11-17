@@ -39,7 +39,7 @@ var config = require('./config.json');
 		http.createServer(function (req, res) {
 			proxyEndpoint(req, res);
 		}).listen(config.port, config.host, function(){
-			console.log('Server running at http://' + config.host + ':' + config.port + '/');				
+			console.log('WebRender Proxy Server running at http://' + config.host + ':' + config.port + '/');				
 		});				
 	}
 
