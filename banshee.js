@@ -6,7 +6,10 @@ var config = require('./config.json');
 	var http = require('http');
 	var respawn = require('respawn');
 
-	var workerPool = new Array();
+	var workerPool = {
+		workers: new Array(),
+		free: new Array()
+	}
 
 	var that = this;
 
@@ -14,23 +17,79 @@ var config = require('./config.json');
 
 		console.log('Proxy request:' + req.url);
 
-		var options = {
-			protocol: 'http:',
-			method: 'GET',
-			hostname: config.host,
-			port: workerPool[0].port,
-			path: '/?url=http://www.google.com'
-		}
+		try{
 
-  		var proxy = http.request(options, function (resp) {
-    		resp.pipe(res, {
-      			end: true
-    		});
-  		});
+			var workerIndex = null;
 
-  		req.pipe(proxy, {
-    		end: true
-  		});
+			if(workerPool && workerPool.workers.length > 0 && workerPool.free.length > 0){
+
+				workerIndex = workerPool.free.pop();
+
+			} else {
+
+				res.setStatus(429);
+				res.end();
+
+				return;
+
+			}
+
+			var options = {
+				protocol: 'http:',
+				method: 'GET',
+				hostname: config.host,
+				port: workerPool.workers[workerIndex].port,
+				path: '/?url=http://www.google.com'
+			}
+
+	  		var proxy = http.request(options, function (resp) {
+
+	    		resp.pipe(res, {
+	      			end: true
+	    		});
+
+	  		});
+
+	  		proxy.setTimeout(config.timeout, function(){
+
+	  			console.log('Proxy timeout');
+
+	  			res.setStatus = 504;
+	  			res.end();
+
+	  		});
+
+	  		proxy.on('error', function(error){
+
+	  			console.log('Proxy error: ' + error.message);
+
+	  			res.setStatus = 500;
+	  			res.end();
+
+	  			return;
+
+	  		});
+
+	  		res.on('finish', function(){
+
+	  			if(workerIndex){
+	  				workerPool.free.push(workerIndex);
+	  			}
+
+	  		})
+
+  			if(worker){
+		  		req.pipe(proxy, {
+		    		end: true
+		  		});
+  			}
+
+  		} catch(error){
+  			console.log('Request error: ' + error.message);
+  			res.setStatus = 500;
+  			res.end();
+  			return;
+  		}
 
 	};
 
@@ -49,12 +108,12 @@ var config = require('./config.json');
 
 		for(i = 0; i < config.workerCount; i++){
 
-			workerPool[i] = {
-				worker: null,
-				port: workerPort
-			};
+			worker = {
+				port: workerPort,
+				process: null
+			}
 
-			workerPool[i].worker = respawn(
+			worker.process = respawn(
 				[
 					'phantomjs',
 					'--disk-cache=no',
@@ -73,7 +132,11 @@ var config = require('./config.json');
       			}
       		);
 
-      		workerPool[i].worker.start();
+      		workerPool.workers[i] = worker;
+
+      		workerPool.workers[i].process.start();
+
+      		workerPool.free.push(i);
 
       		workerPort++;
 

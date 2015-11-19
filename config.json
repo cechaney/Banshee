@@ -2,6 +2,7 @@
 	"version": "0.0.1",
 	"host": "localhost",
 	"port": 8888,
+	"timeout": 10000,
 	"workerCount": 3,
 	"workerConfig": {
         "startingPort": 9000,
