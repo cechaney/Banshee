@@ -127,7 +127,7 @@ var config = require('./config.json');
 				[
 					'phantomjs',
 					'--disk-cache=no',
-					'--load-images=true', //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
+					//'--load-images=true', //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
 					'--ignore-ssl-errors=yes',
 					'--ssl-protocol=any',
 					'worker.js',
