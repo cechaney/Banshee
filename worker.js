@@ -128,8 +128,6 @@ var url = require("url");
 			console.log('No arguments passed at startup');
 		} else {
 
-			console.log('CONFIG:');
-
 			args.forEach(function(arg, i) {
 
 				var valueMatches = argValueExp.exec(arg);
@@ -151,12 +149,12 @@ var url = require("url");
 					switch(paramName.toUpperCase()){
 
 						case CONFIG_FILE:
-							console.log(' CONFIG_FILE=' + paramValue);
-							console.log('Any command line config params passed will overwrite the values from the config file');
+							//console.log(' CONFIG_FILE=' + paramValue);
+							//console.log('Any command line config params passed will overwrite the values from the config file');
 							config = JSON.parse(paramValue);
 
 						case PORT_PARAM:
-							console.log(' PORT=' + paramValue);
+							//console.log(' PORT=' + paramValue);
 							config.port = paramValue;
 							break;
 					}
