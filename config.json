@@ -2,8 +2,10 @@
 	"version": "0.0.1",
 	"host": "localhost",
 	"port": 8888,
-	"timeout": 10000,
+	"timeout": 60000,
 	"workerCount": 3,
+	"workerHost": "localhost",
+	"targetHost": "http://www.google.com",
 	"workerConfig": {
         "startingPort": 9000,
         "timeout": 10000,

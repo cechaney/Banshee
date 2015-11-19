@@ -13,7 +13,7 @@ var url = require("url");
 
 			var service = server.listen(config.port, function(request, response) {
 
-				if(request.url && request.url !== '/favicon.ico'){
+				if(request.url && (request.url !== '/favicon.ico')){
 
 					var urlExp = /=(.*)/;
 					var urlMatches = urlExp.exec(unescape(request.url));

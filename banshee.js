@@ -19,27 +19,34 @@ var config = require('./config.json');
 
 		try{
 
+			if(req.url.indexOf('favicon') > 0){
+	  			res.setStatus = 404;
+	  			res.end();
+	  			return;
+			}
+
 			var workerIndex = null;
 
 			if(workerPool && workerPool.workers.length > 0 && workerPool.free.length > 0){
-
 				workerIndex = workerPool.free.pop();
-
 			} else {
-
 				res.setStatus(429);
 				res.end();
-
 				return;
-
 			}
+
+			var reqMethod = req.method;
+			var workerPort = workerPool.workers[workerIndex].port;
+			var proxyRequestUrl = '/?url=' + config.targetHost + req.url;
+
+			console.log('Forwarding request to: ' + 'http://' + config.host + ':' + workerPort +'/' + proxyRequestUrl);
 
 			var options = {
 				protocol: 'http:',
-				method: 'GET',
-				hostname: config.host,
-				port: workerPool.workers[workerIndex].port,
-				path: '/?url=http://www.google.com'
+				method: reqMethod,
+				hostname: config.workerHost,
+				port: workerPort,
+				path: proxyRequestUrl
 			}
 
 	  		var proxy = http.request(options, function (resp) {
@@ -82,6 +89,9 @@ var config = require('./config.json');
 		  		req.pipe(proxy, {
 		    		end: true
 		  		});
+  			} else {
+				res.setStatus(429);
+				res.end();
   			}
 
   		} catch(error){
@@ -117,7 +127,7 @@ var config = require('./config.json');
 				[
 					'phantomjs',
 					'--disk-cache=no',
-					// '--load-images=true', //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
+					'--load-images=true', //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
 					'--ignore-ssl-errors=yes',
 					'--ssl-protocol=any',
 					'worker.js',
