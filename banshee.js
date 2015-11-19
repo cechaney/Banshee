@@ -71,8 +71,9 @@ var config = require('./config.json');
 			// "--load-images=no", // Due to an issue in QT a memory leak occurs with this. Re-enable when solved. Info: https://github.com/ariya/phantomjs/issues/12903.
 			'--disk-cache=no',
 			'--ignore-ssl-errors=yes',
+			'--load-images=false',
 			'--ssl-protocol=any',
-			'instance.js',
+			'worker.js',
 			{
 			cwd: '.',
 			sleep:1000,
