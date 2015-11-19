@@ -10,34 +10,34 @@ var config = require('./config.json');
 
 	var that = this;
 
-	var proxyEndpoint = function(req, res){
+	var onRequest = function(req, res){
+
+		console.log('Proxy request:' + req.url);
 
 		var options = {
-			host: config.host,
+			protocol: 'http:',
+			method: 'GET',
+			hostname: config.host,
 			port: workerPool[0].port,
-			path: '/'
+			path: '/?url=http://www.google.com'
 		}
 
-		var callback = function(resp){
+  		var proxy = http.request(options, function (resp) {
+    		resp.pipe(res, {
+      			end: true
+    		});
+  		});
 
-			resp.on('data', function(resp){
-				Console.log("sent data");
-			});
-
-		}
-
-		http.request(options, callback).end();
-
-		res.writeHead(200, {'Content-Type': 'text/plain'});
-
-		res.end('Salut tout le monde!\n');
+  		req.pipe(proxy, {
+    		end: true
+  		});
 
 	};
 
 	var startProxyEndpoint = function(){
 
 		http.createServer(function (req, res) {
-			proxyEndpoint(req, res);
+			onRequest(req, res);
 		}).listen(config.port, config.host, function(){
 			console.log('WebRender Proxy Server running at http://' + config.host + ':' + config.port + '/');
 		});
@@ -56,16 +56,20 @@ var config = require('./config.json');
 
 			workerPool[i].worker = respawn(
 				[
-					"phantomjs",
-					"--disk-cache=no",
-					"worker.js",
-					"--port=" + workerPort
+					'phantomjs',
+					'--disk-cache=no',
+					// '--load-images=true', //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
+					'--ignore-ssl-errors=yes',
+					'--ssl-protocol=any',
+					'worker.js',
+					'--port=' + workerPort
 				],
 				{
 	        		cwd: '.',
-	        		sleep: 1000,
-	        		stdio: [0, 1, 2],
-	        		kill: 1000
+	        		maxRestarts:6,
+	        		sleep: 5000,
+	        		kill: 1000,
+	        		stdio: [0, 1, 2]
       			}
       		);
 
@@ -75,21 +79,6 @@ var config = require('./config.json');
 
 		}
 
-	}
-
-	var getWorker = function(port){
-		return 	respawn(['phantomjs',
-			// "--load-images=true", //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
-			'--disk-cache=no',
-			'--ignore-ssl-errors=yes',
-			'--ssl-protocol=any',
-			'worker.js',
-			{
-			cwd: '.',
-			sleep:1000,
-			stdio: [0,1,2],
-			kill: 1000
-		}]);
 	}
 
 	var boot = function(){
