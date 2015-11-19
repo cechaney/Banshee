@@ -16,7 +16,7 @@ var url = require("url");
 				if(request.url && request.url !== '/favicon.ico'){
 
 					var urlExp = /=(.*)/;
-					var urlMatches = urlExp.exec(request.url);
+					var urlMatches = urlExp.exec(unescape(request.url));
 					var rawUrl;
 					var requestUrl;
 

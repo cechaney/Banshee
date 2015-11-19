@@ -4,7 +4,7 @@ var config = require('./config.json');
 (function(config){
 
 	var http = require('http');
-	var respawn = require('respawn');	
+	var respawn = require('respawn');
 
 	var workerPool = new Array();
 
@@ -23,7 +23,7 @@ var config = require('./config.json');
 			resp.on('data', function(resp){
 				Console.log("sent data");
 			});
-			
+
 		}
 
 		http.request(options, callback).end();
@@ -38,14 +38,14 @@ var config = require('./config.json');
 		http.createServer(function (req, res) {
 			proxyEndpoint(req, res);
 		}).listen(config.port, config.host, function(){
-			console.log('Server running at http://' + config.host + ':' + config.port + '/');				
-		});				
+			console.log('Server running at http://' + config.host + ':' + config.port + '/');
+		});
 	}
 
 	var startPool = function(){
 
 		for(i = 0; i < config.workerCount; i++){
-			
+
 			workerPool[i] = {
 				worker: null,
 				port: config.workerConfig.port
@@ -79,7 +79,7 @@ var config = require('./config.json');
 			stdio: [0,1,2],
 			kill: 1000
 		}]);
-	}	
+	}
 
 	var boot = function(){
 		startPool();
