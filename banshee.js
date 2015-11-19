@@ -79,10 +79,9 @@ var config = require('./config.json');
 
 	var getWorker = function(port){
 		return 	respawn(['phantomjs',
-			// "--load-images=no", // Due to an issue in QT a memory leak occurs with this. Re-enable when solved. Info: https://github.com/ariya/phantomjs/issues/12903.
+			// "--load-images=true", //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
 			'--disk-cache=no',
 			'--ignore-ssl-errors=yes',
-			'--load-images=false',
 			'--ssl-protocol=any',
 			'worker.js',
 			{

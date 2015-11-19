@@ -49,6 +49,19 @@ var url = require("url");
 
 						};
 
+						//Manually abort load of image assets.  See this bug https://github.com/ariya/phantomjs/issues/12903.
+						page.onResourceRequested = function(requestData, networkRequest) {
+
+        					if (/\.(jpg|jpeg|png|gif|tif|tiff|mov)$/i.test(requestData.url)){
+
+        						console.log(': Suppressing image #' + requestData.id + ': ' + requestData.url);
+
+            					networkRequest.abort();
+
+            					return;
+        					}
+						};
+
 						page.open(requestUrl.href, function (status) {
 
 						    if (status !== 'success') {
