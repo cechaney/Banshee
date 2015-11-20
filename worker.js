@@ -54,7 +54,7 @@ var url = require("url");
 
         					if (/\.(jpg|jpeg|png|gif|tif|tiff|mov)$/i.test(requestData.url)){
 
-        						console.log(': Suppressing image #' + requestData.id + ': ' + requestData.url);
+        						//console.log(': Suppressing image #' + requestData.id + ': ' + requestData.url);
 
             					networkRequest.abort();
 
