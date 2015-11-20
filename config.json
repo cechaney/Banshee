@@ -5,7 +5,7 @@
 	"timeout": 60000,
 	"workerCount": 3,
 	"workerHost": "localhost",
-	"targetHost": "http://www.yahoo.com",
+	"targetHost": "http://www.homedepot.com",
 	"workerConfig": {
         "startingPort": 9000,
         "timeout": 10000,
