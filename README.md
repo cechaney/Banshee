@@ -1,8 +1,25 @@
 # Banshee
 A custom built Web Render Proxy that uses a pool of PhantomJS instances to provide SEO for JavaScript apps
 
+######Things to keep in mind
+1. This is a POC / Experiment
+2. To go to production it needs more error handling and logging
+3. Implementing a caching strategy in front or inside the proxy code is necessary
+
+######Known issues
+1. The QT library used by Phantom leaks memory if image loading is not enabled when starting PhantomJS.  To address this, code is present to detect loading of images and abort those requests.
+2. Memory usage on OSX seems to have big issues!  I'm seeing 5GB usage by a single instance of PhantomJS, and subsequent crashes.  On Linux Phantom's memory usage is managed correctly and operation is smooth and reliable.
+
 ##Architecture
 <img src="./doc/images/banshee.png"/>
 
 ##Requirements
 JavaScript, Node.js, and PhantomJS are required to run.
+
+##Installation
+1. Install PhantomJS locally
+2. Clone this repository
+3. Run "npm install" in the local repository directory
+4. Change the config.json file's "targetHost" property to the site you want to front
+5. Run "node banshee.js"
+6. In a browser, navigate to "http://localhost:8888"
