@@ -10,7 +10,7 @@ A custom built Web Render Proxy that uses a pool of PhantomJS instances to provi
 
 ######Known issues
 1. The QT library used by PhantomJS leaks memory if image loading is not enabled when starting PhantomJS.  To address this, code is present to detect loading of images and abort those requests. [Link to issue](https://github.com/ariya/phantomjs/issues/12903).
-2. Memory usage on OSX seems to have big issues!  I'm seeing 5GB usage by a single instance of PhantomJS, and subsequent crashes.  On Linux Phantom's memory usage is managed correctly and operation is smooth and reliable.
+2. Memory usage on OSX seems to have big issues if using PhantomJS installed via NPM.  Use another binary distribution.  I'm seeing 5GB usage by a single instance of PhantomJS, and subsequent crashes. 
 
 ##Architecture
 <img src="./doc/images/banshee.png"/>
