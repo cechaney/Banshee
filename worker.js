@@ -26,8 +26,9 @@ var url = require("url");
 
 					try{
 						requestUrl = url.parse(rawUrl);
-					} catch(err){
-						console.log("Failed to parse request url");
+					} catch(error){
+						console.log("Failed to parse request url:" + error.message);
+						return;
 					}
 
 					if(requestUrl && requestUrl.href && requestUrl.protocol){
@@ -36,78 +37,102 @@ var url = require("url");
 
 						page.onError = function(msg, trace) {
 
-						  var msgStack = ['ERROR: ' + msg];
+							try{
+								var msgStack = ['ERROR: ' + msg];
 
-						  if (trace && trace.length) {
-						    msgStack.push('TRACE:');
-						    trace.forEach(function(t) {
-						      msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
-						    });
-						  }
+								if (trace && trace.length) {
+									msgStack.push('TRACE:');
+									trace.forEach(function(t) {
+										msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+									});
+								}
 
-						  console.error(msgStack.join('\n'));
+								console.error(msgStack.join('\n'));								
+							} catch(error){
+								console.log('Error handling page error:' + error.message);
+							}
 
 						};
 
 						//Manually abort load of image assets.  See this bug https://github.com/ariya/phantomjs/issues/12903.
 						page.onResourceRequested = function(requestData, networkRequest) {
 
-        					if (/\.(jpg|jpeg|png|gif|tif|tiff|mov)$/i.test(requestData.url)){
+							try{
 
-        						//console.log(': Suppressing image #' + requestData.id + ': ' + requestData.url);
+	        					if (/\.(jpg|jpeg|png|gif|tif|tiff|mov)$/i.test(requestData.url)){
 
-            					networkRequest.abort();
+	        						//console.log(': Suppressing image #' + requestData.id + ': ' + requestData.url);
 
-            					return;
-        					}
+	            					networkRequest.abort();
+
+	            					return;
+	        					}								
+
+							} catch(error){
+								console.log('Error aborting image load:' + error.message);
+							}
+
+
 						};
 
 						page.open(requestUrl.href, function (status) {
 
-						    if (status !== 'success') {
-						    	response.statusCode = 500;
-						    } else {
+							try{
 
-						    	response.statusCode = 200;
+							    if (status !== 'success') {
+							    	response.statusCode = 500;
+							    } else {
 
-						    	var content = page.content;
+							    	response.statusCode = 200;
 
-						    	content = content.replace('<head>', '<head>\n<base href="' + requestUrl.href + '"/>');
+							    	var content = page.content;
 
-				  				response.write(content);
+							    	content = content.replace('<head>', '<head>\n<base href="' + requestUrl.href + '"/>');
 
-						    }
+					  				response.write(content);
 
-							response.close();
+							    }
 
-							console.log('====================');
-							console.log(status.toUpperCase());
-							console.log(requestUrl.href);
-							console.log(JSON.stringify(requestUrl));
+								response.close();
+
+								console.log('====================');
+								console.log(status.toUpperCase());
+								console.log(requestUrl.href);
+								console.log(JSON.stringify(requestUrl));
+
+							} catch(error){
+								console.log('Error on page open:' + error.message);
+							}
 
 						});
 
 					} else {
 
-						response.close();
+						try{
 
-						console.log('====================');
-						console.log("FAILED");
-						console.log(request.headers.Host + request.url);
-						//console.log(JSON.stringify(request));
+							response.close();
 
-						if(!requestUrl){
-							console.log('Unable to parse url from request');
-						} else {
-							console.log(JSON.stringify(requestUrl));
-						}
+							console.log('====================');
+							console.log("FAILED");
+							console.log(request.headers.Host + request.url);
+							//console.log(JSON.stringify(request));
 
-						if(requestUrl && !requestUrl.href){
-							console.log('No url param passed');
-						}
+							if(!requestUrl){
+								console.log('Unable to parse url from request');
+							} else {
+								console.log(JSON.stringify(requestUrl));
+							}
 
-						if(requestUrl && !requestUrl.protocol){
-							console.log('No protocol passsed in url param');
+							if(requestUrl && !requestUrl.href){
+								console.log('No url param passed');
+							}
+
+							if(requestUrl && !requestUrl.protocol){
+								console.log('No protocol passsed in url param');
+							}
+
+						} catch(error){
+							console.log('Error on handling of bad page syntax:' + error.message);
 						}
 
 					}
@@ -118,10 +143,8 @@ var url = require("url");
 
 			console.log('Phantomjs worker available on port ' + config.port);
 
-		} catch (err) {
-
-			console.log('Phantomjs worker startup failed\n' + err);
-
+		} catch (error) {
+			console.log('Phantomjs worker startup failed\n' + error.message);
 		}
 
 	};
@@ -129,55 +152,61 @@ var url = require("url");
 
 	var getConfig = function() {
 
-		var PORT_PARAM = 'PORT';
-		var CONFIG_FILE = 'CONFIG-FILE';
+		try{
 
-		var config = {};
-		var args = system.args;
-		var argNameExp = /^\--(.*)=/i;
-		var argValueExp = /=(.*)/i;
+			var PORT_PARAM = 'PORT';
+			var CONFIG_FILE = 'CONFIG-FILE';
 
-		if (args.length === 1) {
-			console.log('No arguments passed at startup');
-		} else {
+			var config = {};
+			var args = system.args;
+			var argNameExp = /^\--(.*)=/i;
+			var argValueExp = /=(.*)/i;
 
-			args.forEach(function(arg, i) {
+			if (args.length === 1) {
+				console.log('No arguments passed at startup');
+			} else {
 
-				var valueMatches = argValueExp.exec(arg);
-				var paramValue;
+				args.forEach(function(arg, i) {
 
-				if(valueMatches){
-					paramValue = valueMatches[1];
-				}
+					var valueMatches = argValueExp.exec(arg);
+					var paramValue;
 
-				var nameMatches = argNameExp.exec(arg);
-				var paramName;
-
-				if(nameMatches){
-					paramName = nameMatches[1];
-				}
-
-				if(paramName){
-
-					switch(paramName.toUpperCase()){
-
-						case CONFIG_FILE:
-							//console.log(' CONFIG_FILE=' + paramValue);
-							//console.log('Any command line config params passed will overwrite the values from the config file');
-							config = JSON.parse(paramValue);
-
-						case PORT_PARAM:
-							//console.log(' PORT=' + paramValue);
-							config.port = paramValue;
-							break;
+					if(valueMatches){
+						paramValue = valueMatches[1];
 					}
 
-				}
+					var nameMatches = argNameExp.exec(arg);
+					var paramName;
 
-		  	});
+					if(nameMatches){
+						paramName = nameMatches[1];
+					}
+
+					if(paramName){
+
+						switch(paramName.toUpperCase()){
+
+							case CONFIG_FILE:
+								//console.log(' CONFIG_FILE=' + paramValue);
+								//console.log('Any command line config params passed will overwrite the values from the config file');
+								config = JSON.parse(paramValue);
+
+							case PORT_PARAM:
+								//console.log(' PORT=' + paramValue);
+								config.port = paramValue;
+								break;
+						}
+
+					}
+
+			  	});
+			}
+
+			return config;
+
+		} catch(error){
+			console.log('Error on worker configuration:' + error.message);
 		}
-
-		return config;
 
 	};
 
@@ -199,9 +228,14 @@ var url = require("url");
 
 	};
 
-	config = getConfig();
+	try{
 
-	startServer(config);
+		config = getConfig();
+		startServer(config);
+
+	} catch(error){
+		console.log('Error on worker startup: ' + error.message);
+	}
 
 
 }).call(this);

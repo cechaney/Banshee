@@ -58,7 +58,7 @@ var config = require('./config.json');
 		    		});	  				
 
 	  			} catch(error){
-	  				console.log('Error on proxy request');
+	  				console.log('Error on proxy request: ' + error.message);
 	  			}
 
 	  		});
@@ -73,7 +73,7 @@ var config = require('./config.json');
 		  			res.end();	  				
 
 	  			} catch(error){
-	  				console.log('Error on handle of proxy timeout');
+	  				console.log('Error on handle of proxy timeout: ' + error.message);
 	  			}
 
 	  		});
@@ -88,7 +88,7 @@ var config = require('./config.json');
 		  			res.end();	  				
 
 	  			} catch(error){
-	  				console.log('Error on proxy error handle');
+	  				console.log('Error on proxy error handle: ' + error.message);
 	  			}
 
 	  		});
@@ -102,7 +102,7 @@ var config = require('./config.json');
 		  			}
 
 	  			} catch(error){
-					console.log('Error on request finish');
+					console.log('Error on request finish:' + error.message);
 	  			}
 
 	  		});
@@ -136,7 +136,7 @@ var config = require('./config.json');
 			});
 
 		} catch(error){
-			console.log('Error on proxy endpoint start');
+			console.log('Error on proxy endpoint start:' + error.message);
 		}
 
 	}
@@ -184,7 +184,7 @@ var config = require('./config.json');
 			}			
 
 		} catch(error){
-			console.log('Error on PhantomJS pool start');
+			console.log('Error on PhantomJS pool start:' + error.message);
 		}
 
 	}
@@ -197,7 +197,7 @@ var config = require('./config.json');
 			startProxyEndpoint();
 
 		} catch(error){
-			console.log('Error on Banshee boot');
+			console.log('Error on Banshee boot:' + error.message);
 		}
 
 	}
