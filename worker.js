@@ -25,7 +25,9 @@ var url = require("url");
 					}
 
 					try{
+
 						requestUrl = url.parse(rawUrl);
+
 					} catch(error){
 						console.log("Failed to parse request url:" + error.message);
 						return;
