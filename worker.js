@@ -1,4 +1,3 @@
-var system = require('system');
 var webserver = require('webserver');
 var webPage = require('webpage');
 var system = require('system');
