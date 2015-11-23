@@ -3,6 +3,7 @@ var config = require('./config.json');
 
 (function(config){
 
+	var log4js = require('log4js');
 	var http = require('http');
 	var respawn = require('respawn');
 
@@ -13,17 +14,26 @@ var config = require('./config.json');
 
 	var that = this;
 
+	try{
+		log4js.configure('log4js.json', {});
+	} catch(error){
+		console.log('Error configuring logging:' + error.message);
+		return;
+	}
+
+	var logger = log4js.getLogger('banshee');		
+
 	var onRequest = function(req, res){
 
 		try{
 
-			console.log('Proxy request:' + req.url);			
-
-			if(req.url.indexOf('favicon') > 0){
-	  			res.setStatus = 404;
-	  			res.end();
-	  			return;
+			if (req.url === '/favicon.ico') {
+				res.writeHead(200, {'Content-Type': 'image/x-icon'} );
+				res.end();
+				return;
 			}
+
+			logger.debug('Proxy request:' + req.url);			
 
 			var workerIndex = null;
 
@@ -39,7 +49,7 @@ var config = require('./config.json');
 			var workerPort = workerPool.workers[workerIndex].port;
 			var proxyRequestUrl = '/?url=' + config.targetHost + req.url;
 
-			console.log('Forwarding request to: ' + 'http://' + config.host + ':' + workerPort +'/' + proxyRequestUrl);
+			logger.debug('Forwarding request to: ' + 'http://' + config.host + ':' + workerPort +'/' + proxyRequestUrl);
 
 			var options = {
 				protocol: 'http:',
@@ -58,7 +68,7 @@ var config = require('./config.json');
 		    		});	  				
 
 	  			} catch(error){
-	  				console.log('Error on proxy request: ' + error.message);
+	  				logger.error('Error on proxy request: ' + error.message);
 	  			}
 
 	  		});
@@ -67,13 +77,13 @@ var config = require('./config.json');
 
 	  			try{
 
-		  			console.log('Proxy timeout');
+		  			logger.error('Proxy timeout');
 
 		  			res.setStatus = 504;
 		  			res.end();	  				
 
 	  			} catch(error){
-	  				console.log('Error on handle of proxy timeout: ' + error.message);
+	  				logger.error('Error on handle of proxy timeout: ' + error.message);
 	  			}
 
 	  		});
@@ -82,13 +92,13 @@ var config = require('./config.json');
 
 	  			try{
 
-		  			console.log('Proxy error: ' + error.message);
+		  			logger.error('Proxy error: ' + error.message);
 
 		  			res.setStatus = 500;
 		  			res.end();	  				
 
 	  			} catch(error){
-	  				console.log('Error on proxy error handle: ' + error.message);
+	  				logger.error('Error on proxy error handle: ' + error.message);
 	  			}
 
 	  		});
@@ -102,7 +112,7 @@ var config = require('./config.json');
 		  			}
 
 	  			} catch(error){
-					console.log('Error on request finish:' + error.message);
+					logger.error('Error on request finish:' + error.message);
 	  			}
 
 	  		});
@@ -117,7 +127,7 @@ var config = require('./config.json');
   			}
 
   		} catch(error){
-  			console.log('Request error: ' + error.message);
+  			logger.error('Request error: ' + error.message);
   			res.setStatus = 500;
   			res.end();
   			return;
@@ -132,11 +142,11 @@ var config = require('./config.json');
 			http.createServer(function (req, res) {
 				onRequest(req, res);
 			}).listen(config.port, config.host, function(){
-				console.log('WebRender Proxy Server running at http://' + config.host + ':' + config.port + '/');
+				logger.info('WebRender Proxy Server running at http://' + config.host + ':' + config.port + '/');
 			});
 
 		} catch(error){
-			console.log('Error on proxy endpoint start:' + error.message);
+			logger.error('Error on proxy endpoint start:' + error.message);
 		}
 
 	}
@@ -173,8 +183,20 @@ var config = require('./config.json');
 	      			}
 	      		);
 
-	      		workerPool.workers[i] = worker;
+				worker.process.on('stdout', function(data){
+					logger.debug(JSON.stringify(data));
+				});	      		
 
+				worker.process.on('stderr', function(data){
+					logger.error(JSON.stringify(data));
+				});	      						
+
+				worker.process.on('warn', function(err){
+					logger.error(err.message);
+				});					
+
+	      		workerPool.workers[i] = worker;
+				
 	      		workerPool.workers[i].process.start();
 
 	      		workerPool.free.push(i);
@@ -184,7 +206,7 @@ var config = require('./config.json');
 			}			
 
 		} catch(error){
-			console.log('Error on PhantomJS pool start:' + error.message);
+			logger.error('Error on PhantomJS pool start:' + error.message);
 		}
 
 	}
@@ -197,7 +219,7 @@ var config = require('./config.json');
 			startProxyEndpoint();
 
 		} catch(error){
-			console.log('Error on Banshee boot:' + error.message);
+			logger.error('Error on Banshee boot:' + error.message);
 		}
 
 	}

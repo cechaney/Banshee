@@ -1,3 +1,4 @@
+var system = require('system');
 var webserver = require('webserver');
 var webPage = require('webpage');
 var system = require('system');
@@ -39,20 +40,23 @@ var url = require("url");
 
 						page.onError = function(msg, trace) {
 
-							try{
-								var msgStack = ['ERROR: ' + msg];
+							//Enable for debugging of page errors
 
-								if (trace && trace.length) {
-									msgStack.push('TRACE:');
-									trace.forEach(function(t) {
-										msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
-									});
-								}
+							// try{
+							// 	var msgStack = ['ERROR: ' + msg];
 
-								console.error(msgStack.join('\n'));								
-							} catch(error){
-								console.log('Error handling page error:' + error.message);
-							}
+							// 	if (trace && trace.length) {
+							// 		msgStack.push('TRACE:');
+							// 		trace.forEach(function(t) {
+							// 			msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+							// 		});
+							// 	}
+
+							// 	//console.error(msgStack.join('\n'));								
+
+							// } catch(error){
+							// 	console.log('Error handling page error:' + error.message);
+							// }
 
 						};
 

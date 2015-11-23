@@ -30,4 +30,4 @@ JavaScript, Node.js, and PhantomJS are required to run.
 The following articles and repositories inspired this project
 * [Sumgmug Sorcery PhantomJS at scale](http://sorcery.smugmug.com/2013/12/17/using-phantomjs-at-scale/)
 * [Phantom Manager](https://github.com/FTBpro/phantom-manager)
-* [PhearJS](https://github.com/Tomtomgo/phearjs_)
+* [PhearJS](https://github.com/Tomtomgo/phearjs)
