@@ -121,7 +121,6 @@ var config = require('./config.json');
 	  			try{
 		  			logger.error('Proxy load timeout');
 		  			res.statusCode = 504;
-		  			res.end();
 	  			} catch(error){
 	  				logger.error('Error on handle of proxy timeout: ' + error.message);
 	  			}
@@ -133,7 +132,6 @@ var config = require('./config.json');
 	  			try{
 		  			logger.error('Proxy error: ' + error.message);
 		  			res.statusCode = 500;
-		  			res.end();
 	  			} catch(error){
 	  				logger.error('Error on proxy error handle: ' + error.message);
 	  			}
@@ -162,7 +160,6 @@ var config = require('./config.json');
 
 				} else {
 					res.statusCode = 429;
-					res.end();
 				}
 
   		} catch(error){
@@ -170,7 +167,6 @@ var config = require('./config.json');
   			logger.error('Proxy request error: ' + error.message);
 
   			res.statusCode = 500;
-  			res.end;  			
 
   			return;
   		}		
