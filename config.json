@@ -2,10 +2,10 @@
 	"version": "0.0.1",
 	"host": "localhost",
 	"port": 8888,
-	"requestTimeout": 35000,
-	"proxyLoadTimeout": 30000,
+	"requestTimeout": 30000,
+	"proxyLoadTimeout": 25000,
 	"workerPoolCheckInterval": 100,
-	"workerCount": 2,
+	"workerCount": 5,
 	"workerHost": "localhost",
 	"targetHost": "http://www.yahoo.com",
 	"workerConfig": {

@@ -1,15 +1,18 @@
 {
   "appenders": [
     {
-      "type": "console"
+      "type": "console",
+      "category": "banshee"
     },
     {
       "type": "file",
       "filename": "banshee.log",
       "maxLogSize": 20480,
       "backups": 3,
-      "category": "banshee",
-      "level": "debug"
+      "category": "banshee"
     }
-  ]
+  ],
+  "levels": {
+    "banshee":  "DEBUG"
+  }
 }

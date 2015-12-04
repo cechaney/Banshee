@@ -15,7 +15,7 @@ var config = require('./config.json');
 	var that = this;
 
 	try{
-		log4js.configure('log4js.json', {});
+		log4js.configure('./log4js.json', {});
 	} catch(error){
 		console.log('Error configuring logging:' + error.message);
 		return;
@@ -23,7 +23,8 @@ var config = require('./config.json');
 
 	var logger = log4js.getLogger('banshee');		
 
-	var onRequest = function(req, res){
+	var handleRequest = function(req, res){
+
 
 		try{
 
@@ -36,7 +37,7 @@ var config = require('./config.json');
 
 			}
 
-			logger.debug('Proxy request:' + req.url);			
+			//logger.debug('Proxy request:' + req.url);
 
 			var workerIndex = null;
 
@@ -49,9 +50,6 @@ var config = require('./config.json');
 					clearInterval(poolCheckInterval);
 
 					res.statusCode = 429;
-					res.end();
-					
-					return;
 
 				} else {
 
@@ -63,7 +61,7 @@ var config = require('./config.json');
 
 						workerIndex = workerPool.free.pop();
 
-						proxyRequest(workerIndex, req, res)
+						callProxy(workerIndex, req, res)
 
 					}
 
@@ -84,15 +82,21 @@ var config = require('./config.json');
 
 	};
 
-	var proxyRequest = function(workerIndex, req, res){
+	var callProxy = function(workerIndex, req, res){
 
 		try{
+
+			if(!workerPool.workers || !workerPool.workers[workerIndex]){
+	  			logger.error('No worker (' + workerIndex + ') available for request ' );
+	  			res.statusCode = 500;				
+				return;
+			}
 
 			var reqMethod = req.method;
 			var workerPort = workerPool.workers[workerIndex].port;
 			var proxyRequestUrl = '/?url=' + config.targetHost + req.url;
 
-			logger.debug('Forwarding request to: ' + 'http://' + config.host + ':' + workerPort +'/' + proxyRequestUrl);
+			logger.debug('Worker: ' + workerIndex + ' calling url: ' + 'http://' + config.host + ':' + workerPort + proxyRequestUrl);
 
 			var options = {
 				protocol: 'http:',
@@ -132,6 +136,7 @@ var config = require('./config.json');
 	  			try{
 		  			logger.error('Proxy error: ' + error.message);
 		  			res.statusCode = 500;
+		  			res.end;
 	  			} catch(error){
 	  				logger.error('Error on proxy error handle: ' + error.message);
 	  			}
@@ -143,7 +148,11 @@ var config = require('./config.json');
 	  			try{
 
 		  			if(workerIndex !== undefined  && workerIndex !== null){
-		  				workerPool.free.push(workerIndex);
+
+		  				if(workerPool.free.indexOf(workerIndex) < 0){
+		  					workerPool.free.push(workerIndex);	
+		  				}
+		  				
 		  			}
 
 	  			} catch(error){
@@ -152,19 +161,36 @@ var config = require('./config.json');
 
 	  		});
 
-				if(worker){
+			req.on('close', function(){
 
-			  		req.pipe(proxy, {
-			    		end: true
-			  		});
+				try{
 
-				} else {
-					res.statusCode = 429;
+					proxy.abort();
+
+	  				if(workerPool.free.indexOf(workerIndex) < 0){
+	  					workerPool.free.push(workerIndex);	
+	  					logger.debug('Added worker back into active pool ' + workerIndex);
+	  				}
+
+				} catch(error){
+					logger.error('Error on request close:' + error.message);	
 				}
+				
+			});	
+
+			if(worker){
+
+		  		req.pipe(proxy, {
+		    		end: true
+		  		});
+
+			} else {
+				res.statusCode = 429;
+			}
 
   		} catch(error){
 
-  			logger.error('Proxy request error: ' + error.message);
+  			logger.error('Proxy request error: ' + error.message + '\r\n' + error.stack);
 
   			res.statusCode = 500;
 
@@ -178,7 +204,9 @@ var config = require('./config.json');
 		try{
 
 			http.createServer(function (req, res) {
-				onRequest(req, res);
+
+				handleRequest(req, res);
+
 			}).listen(config.port, config.host, function(){
 				logger.info('WebRender Proxy Server running at http://' + config.host + ':' + config.port + '/');
 				logger.info('Proxying traffic for: ' + config.targetHost);
@@ -199,9 +227,12 @@ var config = require('./config.json');
 			for(i = 0; i < config.workerCount; i++){
 
 				worker = {
+					id: null,
 					port: workerPort,
 					process: null
 				}
+
+				worker.id = i;
 
 				worker.process = respawn(
 					[
@@ -214,13 +245,17 @@ var config = require('./config.json');
 						'--port=' + workerPort
 					],
 					{
+						env: {
+							id: i,
+							port: workerPort
+						},
 		        		cwd: '.',
-		        		maxRestarts:6,
-		        		sleep: 5000,
+		        		maxRestarts:-1,
+		        		sleep: 1000,
 		        		kill: 1000,
 		        		stdio: [0, 1, 2]
 	      			}
-	      		);
+	      		);	
 
 				worker.process.on('stdout', function(data){
 					logger.debug(JSON.stringify(data));
@@ -232,15 +267,28 @@ var config = require('./config.json');
 
 				worker.process.on('warn', function(err){
 					logger.error(err.message);
-				});					
+				});
+
+				worker.process.on('crash', function(){
+					logger.error('Worker process crashed');
+				});
+
+				worker.process.on('spawn', function(process){
+
+					if(process !== null){
+						logger.info('Spawning worker id: ' + this.env.id + ' port: ' + this.env.port);						
+						workerPool.free.push(this.env.id);						
+					}
+
+				});			
 
 	      		workerPool.workers[i] = worker;
 				
 	      		workerPool.workers[i].process.start();
 
-	      		workerPool.free.push(i);
-
 	      		workerPort++;
+
+	      		worker = null;
 
 			}			
 

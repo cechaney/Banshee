@@ -103,7 +103,7 @@ var url = require("url");
 								console.log('====================');
 								console.log(status.toUpperCase());
 								console.log(requestUrl.href);
-								console.log(JSON.stringify(requestUrl));
+								//console.log(JSON.stringify(requestUrl));
 
 							} catch(error){
 								console.log('Error on page open:' + error.message);
