@@ -7,8 +7,9 @@
 	"workerPoolCheckInterval": 100,
 	"workerCount": 5,
 	"workerHost": "localhost",
-	"workerMaxMemory": 250,
-	"targetHost": "http://www.twitter.com",
+	"workerMaxMemory": 100,
+	"workerStartupPause": 500,
+	"targetHost": "http://www.yahoo.com",
 	"workerConfig": {
         "startingPort": 9000,
         "timeout": 10000,

@@ -62,13 +62,6 @@ var pidusage = require('pidusage');
 
 						workerIndex = workerPool.free.pop();
 
-						/*
-						//Possible feature to restart a PhantomJS instance  if it's using too much memory
-						pidusage.stat(worker.pid, function(err, stat) {
-						    logger.info('Port: ' +  workerPort + ' PID:' + worker.pid + ' Mem: %s', stat.memory);
-						});
-						*/												
-
 						callWorker(workerIndex, req, res)
 
 					}
@@ -165,7 +158,34 @@ var pidusage = require('pidusage');
 		  			if(workerIndex !== undefined  && workerIndex !== null){
 
 		  				if(workerPool.free.indexOf(workerIndex) < 0){
-		  					workerPool.free.push(workerIndex);	
+
+							var workerPort = workerPool.workers[workerIndex].port;
+		  					var worker = workerPool.workers[workerIndex].process;
+
+		  					if(worker){
+
+								//Restart the worker process if it's over the Mbytes set in config.workerMaxMemory
+								pidusage.stat(worker.pid, function(err, stat) {
+
+									var mem = (stat.memory / 1024) / 1024;
+
+									logger.debug('Port: ' +  workerPort + ' PID:' + worker.pid + ' Mem: %s', mem.toFixed(2) + ' Mbytes');
+
+									if(mem > config.workerMaxMemory){
+
+										logger.info('Restarting worker ' + workerIndex + ' Port: ' + workerPort + ' memory usage exceeded ' + config.workerMaxMemory + ' Mbytes');
+
+										worker.stop(function() {
+  											worker.start();
+										});
+
+									} else {
+										workerPool.free.push(workerIndex);
+									}
+								    
+								});		  						
+		  					}
+		  					
 		  				}
 		  				
 		  			}
@@ -291,8 +311,15 @@ var pidusage = require('pidusage');
 				worker.process.on('spawn', function(process){
 
 					if(process !== null){
+						
 						logger.info('Spawning worker id: ' + this.env.id + ' port: ' + this.env.port);						
-						workerPool.free.push(this.env.id);						
+
+						var workerIndex = this.env.id;
+
+						setTimeout(function(){
+							workerPool.free.push(workerIndex);
+						}, config.workerStartupPause);
+						
 					}
 
 				});			
