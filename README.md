@@ -4,14 +4,11 @@ A custom built Web Render Proxy that uses a pool of PhantomJS instances to provi
 <hr/>
 
 ######Things to keep in mind
-1. This is a POC / Experiment
-2. To go to production it needs MUCH better error handling and logging
-3. Implementing a caching strategy in front or inside the proxy code is necessary
+1. Implementing a caching strategy in front or inside the proxy code is necessary
 
 ######Known issues
 1. The QT library used by PhantomJS leaks memory if image loading is not enabled when starting PhantomJS.  To address this, code is present to detect loading of images and abort those requests. [Link to issue](https://github.com/ariya/phantomjs/issues/12903).
-2. Memory usage with PhantomJS 2 on OSX seems to have big issues! Use a previous binary distribution.  I'm seeing 5GB usage by a single instance of PhantomJS, and subsequent crashes.  Memory usage and performance is excellent on Linux ;) 
-3. PhantomJS 1.9x, STDIO and Ubuntu do not play well together.  Calls to "console.log" do not arrive in the Banshee log file as a result on UBUNTU.
+2. Memory usage with PhantomJS 2 on OSX seems to have big issues! Use a 1.x binary distribution.  I'm seeing 5GB usage by a single instance of PhantomJS, and subsequent crashes.  Memory usage and performance is excellent on Linux ;) 
 
 ##Architecture
 <img src="./doc/images/banshee.png"/>
