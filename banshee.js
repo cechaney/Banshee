@@ -259,20 +259,20 @@ var config = require('./config.json');
 		        		maxRestarts:-1,
 		        		sleep: 1000,
 		        		kill: 1000,
-		        		stdio: [0, 1, 2]
+		        		stdio: ['pipe', 'pipe', 'pipe']
 	      			}
 	      		);	
 
 				worker.process.on('stdout', function(data){
-					logger.debug(JSON.stringify(data));
+					logger.info('Worker:' + data);
 				});	      		
 
 				worker.process.on('stderr', function(data){
-					logger.error(JSON.stringify(data));
+					logger.error('Worker:' + data);
 				});	      						
 
 				worker.process.on('warn', function(err){
-					logger.error(err.message);
+					logger.warn('Worker:' + err);
 				});
 
 				worker.process.on('crash', function(){
