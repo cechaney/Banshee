@@ -62,7 +62,7 @@ var config = require('./config.json');
 
 						workerIndex = workerPool.free.pop();
 
-						callProxy(workerIndex, req, res)
+						callWorker(workerIndex, req, res)
 
 					}
 
@@ -83,7 +83,7 @@ var config = require('./config.json');
 
 	};
 
-	var callProxy = function(workerIndex, req, res){
+	var callWorker = function(workerIndex, req, res){
 
 		try{
 
@@ -94,20 +94,22 @@ var config = require('./config.json');
 			}
 
 			var reqMethod = req.method;
-			var workerPort = workerPool.workers[workerIndex].port;
-			var proxyRequestUrl = '/?url=' + config.targetHost + req.url;
+			var requestUrl = '/?url=' + config.targetHost + req.url;
 
-			logger.debug('Worker: ' + workerIndex + ' calling url: ' + 'http://' + config.host + ':' + workerPort + proxyRequestUrl);
+			var workerPort = workerPool.workers[workerIndex].port;
+			var worker = workerPool.workers[workerIndex].process;
+
+			logger.debug('Worker: ' + workerIndex + ' calling url: ' + 'http://' + config.host + ':' + workerPort + requestUrl);
 
 			var options = {
 				protocol: 'http:',
 				method: reqMethod,
 				hostname: config.workerHost,
 				port: workerPort,
-				path: proxyRequestUrl
+				path: requestUrl
 			}
 
-	  		var proxy = http.request(options, function (resp) {
+	  		var workerRequest = http.request(options, function (resp) {
 
 	  			try{
 
@@ -116,35 +118,35 @@ var config = require('./config.json');
 		    		});	  				
 
 	  			} catch(error){
-	  				logger.error('Error on proxy request: ' + error.message);
+	  				logger.error('Error on worker request: ' + error.message);
 	  			}
 
 	  		});
 
-	  		proxy.setTimeout(config.proxyLoadTimeout, function(){
+	  		workerRequest.setTimeout(config.proxyLoadTimeout, function(){
 
 	  			try{
 
-		  			logger.error('Proxy load timeout');
+		  			logger.error('Worker load timeout');
 
 		  			res.statusCode = 504;
 
 	  			} catch(error){
-	  				logger.error('Error on handle of proxy timeout: ' + error.message);
+	  				logger.error('Error on handle of worker timeout: ' + error.message);
 	  			}
 
 	  		});
 
-	  		proxy.on('error', function(error){
+	  		workerRequest.on('error', function(error){
 
 	  			try{
 
-		  			logger.error('Proxy error: ' + error.message);
+		  			logger.error('Worker error: ' + error.message);
 
 		  			res.statusCode = 500;
 
 	  			} catch(error){
-	  				logger.error('Error on proxy error handle: ' + error.message);
+	  				logger.error('Error on worker error handle: ' + error.message);
 	  			}
 
 	  		});
@@ -171,7 +173,7 @@ var config = require('./config.json');
 
 				try{
 
-					proxy.abort();
+					workerRequest.abort();
 
 	  				if(workerPool.free.indexOf(workerIndex) < 0){
 	  					workerPool.free.push(workerIndex);	
@@ -184,9 +186,9 @@ var config = require('./config.json');
 				
 			});	
 
-			if(proxy){
+			if(workerRequest){
 
-		  		req.pipe(proxy, {
+		  		req.pipe(workerRequest, {
 		    		end: true
 		  		});
 
