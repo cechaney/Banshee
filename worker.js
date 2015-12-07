@@ -105,6 +105,9 @@ var url = require("url");
 								console.log(requestUrl.href);
 								//console.log(JSON.stringify(requestUrl));
 
+								//Leaving this out causes massive memory leaks
+								page.close();
+
 							} catch(error){
 								console.log('Error on page open:' + error.message);
 							}
