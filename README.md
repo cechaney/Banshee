@@ -15,7 +15,7 @@ Banshee is "self-healing".  It can recover from pooled PhantomJS instances crash
 <img src="./doc/images/banshee.png"/>
 
 ##Requirements
-JavaScript, Node.js, and PhantomJS are required to run.
+Node.js, and PhantomJS are required to run.
 
 ##Installation
 1. Install PhantomJS locally
