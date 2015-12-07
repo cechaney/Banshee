@@ -50,6 +50,7 @@ var config = require('./config.json');
 					clearInterval(poolCheckInterval);
 
 					res.statusCode = 429;
+					res.end();
 
 				} else {
 
@@ -88,7 +89,7 @@ var config = require('./config.json');
 
 			if(!workerPool.workers || !workerPool.workers[workerIndex]){
 	  			logger.error('No worker (' + workerIndex + ') available for request ' );
-	  			res.statusCode = 500;				
+	  			res.statusCode = 500;
 				return;
 			}
 
@@ -123,8 +124,11 @@ var config = require('./config.json');
 	  		proxy.setTimeout(config.proxyLoadTimeout, function(){
 
 	  			try{
+
 		  			logger.error('Proxy load timeout');
+
 		  			res.statusCode = 504;
+
 	  			} catch(error){
 	  				logger.error('Error on handle of proxy timeout: ' + error.message);
 	  			}
@@ -134,9 +138,11 @@ var config = require('./config.json');
 	  		proxy.on('error', function(error){
 
 	  			try{
+
 		  			logger.error('Proxy error: ' + error.message);
+
 		  			res.statusCode = 500;
-		  			res.end;
+
 	  			} catch(error){
 	  				logger.error('Error on proxy error handle: ' + error.message);
 	  			}
@@ -178,7 +184,7 @@ var config = require('./config.json');
 				
 			});	
 
-			if(worker){
+			if(proxy){
 
 		  		req.pipe(proxy, {
 		    		end: true
@@ -238,7 +244,7 @@ var config = require('./config.json');
 					[
 						'phantomjs',
 						'--disk-cache=no',
-						//'--load-images=true', //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
+						//'--load-images=false', //Do not enable this.  https://github.com/ariya/phantomjs/issues/12903
 						'--ignore-ssl-errors=yes',
 						'--ssl-protocol=any',
 						'worker.js',
