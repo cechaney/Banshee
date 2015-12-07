@@ -27,6 +27,23 @@ JavaScript, Node.js, and PhantomJS are required to run.
 5. Run "node banshee.js"
 6. In a browser, navigate to "http://localhost:8888"
 
+##Configuration
+Look to the config.json file for configuration. Settings are...
+
+* host - Banshee hostname
+* port - Banshee port
+* requestTimeout - Banshee timeout in ms
+* proxyLoadTimeout - Timeout waiting for PhantomJS to respond in ms
+* workerCount - Number of PhantomJS instances to start
+* workerHost - Hostname of PhantomJS workers
+* workerPoolCheckInterval - Interval in ms for available PhantomJS instance in pool
+* workerMaxMemory - Max MBytes an instance of PhantomJS may use before being terminated and restarted by Banshee
+* workerStartupPause - Pause in ms to wait for PhantomJS worker to start
+* targetHost - The host that Banshee is fronting. Point this at the site you want to the workers to render
+* workerConfig
+	** startingPort - The port Banshee uses to start worker pool. Subsequent workers are assigned incremental port numbers. 9000,9001,9002
+	** timeout - The timeout for the PhantomJS page object to load a requested page
+
 ######Credit where credit is due.
 The following articles and repositories inspired this project
 * [Sumgmug Sorcery PhantomJS at scale](http://sorcery.smugmug.com/2013/12/17/using-phantomjs-at-scale/)

@@ -129,7 +129,13 @@ var pidusage = require('pidusage');
 
 		  			logger.error('Worker load timeout');
 
+	  				if(workerPool.free.indexOf(workerIndex) < 0){
+	  					workerPool.free.push(workerIndex);	
+	  					logger.debug('Added worker back into active pool ' + workerIndex);
+	  				}
+
 		  			res.statusCode = 504;
+		  			res.end;
 
 	  			} catch(error){
 	  				logger.error('Error on handle of worker timeout: ' + error.message);
@@ -143,7 +149,13 @@ var pidusage = require('pidusage');
 
 		  			logger.error('Worker error: ' + error.message);
 
+	  				if(workerPool.free.indexOf(workerIndex) < 0){
+	  					workerPool.free.push(workerIndex);	
+	  					logger.debug('Added worker back into active pool ' + workerIndex);
+	  				}
+
 		  			res.statusCode = 500;
+		  			res.end;
 
 	  			} catch(error){
 	  				logger.error('Error on worker error handle: ' + error.message);
