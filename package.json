@@ -8,6 +8,7 @@
 		"respawn": "latest",
 		"log4js": "latest",
 		"qs": "latest",
-		"url": "latest"
+		"url": "latest",
+		"pidusage": "latest"
 	}
 }

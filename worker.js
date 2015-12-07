@@ -100,9 +100,7 @@ var url = require("url");
 
 								response.close();
 
-								console.log('====================');
-								console.log(status.toUpperCase());
-								console.log(requestUrl.href);
+								console.log(status.toUpperCase() + ' ' + requestUrl.href);
 								//console.log(JSON.stringify(requestUrl));
 
 								//Leaving this out causes massive memory leaks
@@ -110,6 +108,7 @@ var url = require("url");
 
 							} catch(error){
 								console.log('Error on page open:' + error.message);
+								page.close();
 							}
 
 						});
@@ -120,9 +119,7 @@ var url = require("url");
 
 							response.close();
 
-							console.log('====================');
-							console.log("FAILED");
-							console.log(request.headers.Host + request.url);
+							console.log("FAILED " + request.headers.Host + request.url);
 							//console.log(JSON.stringify(request));
 
 							if(!requestUrl){

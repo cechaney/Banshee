@@ -1,11 +1,11 @@
 
 var config = require('./config.json');
+var log4js = require('log4js');
+var http = require('http');
+var respawn = require('respawn');
+var pidusage = require('pidusage');
 
 (function(config){
-
-	var log4js = require('log4js');
-	var http = require('http');
-	var respawn = require('respawn');
 
 	var workerPool = {
 		workers: new Array(),
@@ -61,6 +61,13 @@ var config = require('./config.json');
 						clearInterval(poolCheckInterval);
 
 						workerIndex = workerPool.free.pop();
+
+						/*
+						//Possible feature to restart a PhantomJS instance  if it's using too much memory
+						pidusage.stat(worker.pid, function(err, stat) {
+						    logger.info('Port: ' +  workerPort + ' PID:' + worker.pid + ' Mem: %s', stat.memory);
+						});
+						*/												
 
 						callWorker(workerIndex, req, res)
 
@@ -266,7 +273,7 @@ var config = require('./config.json');
 	      		);	
 
 				worker.process.on('stdout', function(data){
-					logger.info('Worker:' + data);
+					logger.debug('Worker:' + data);
 				});	      		
 
 				worker.process.on('stderr', function(data){
