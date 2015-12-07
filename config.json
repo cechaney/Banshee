@@ -7,6 +7,7 @@
 	"workerPoolCheckInterval": 100,
 	"workerCount": 5,
 	"workerHost": "localhost",
+	"workerMaxMemory": 250,
 	"targetHost": "http://www.twitter.com",
 	"workerConfig": {
         "startingPort": 9000,
