@@ -4,6 +4,9 @@
 	"homepage": "",
 	"description": "A node.js service that returns html rendered",
 	"author": "Chris Chaney",
+	"scripts": {
+		"start": "node banshee.js"
+	},
 	"dependencies": {
 		"respawn": "latest",
 		"log4js": "latest",
